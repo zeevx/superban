@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Zeevx\Superban\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class SuperbanCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'superban';
 
     public $description = 'My command';
 
