@@ -2,7 +2,8 @@
 
 namespace Zeevx\Superban\Tests;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Mail;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Zeevx\Superban\SuperbanServiceProvider;
 
@@ -11,10 +12,14 @@ class TestCase extends Orchestra
     protected function setUp(): void
     {
         parent::setUp();
+        Artisan::call('cache:clear');
+        Mail::fake();
+    }
 
-        Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Zeevx\\Superban\\Database\\Factories\\'.class_basename($modelName).'Factory'
-        );
+    protected function getEnvironmentSetUp($app)
+    {
+        $app['config']->set('superban.email_address', 'example@mail.com');
+        $app['config']->set('superban.cache', 'array');
     }
 
     protected function getPackageProviders($app)
@@ -22,15 +27,5 @@ class TestCase extends Orchestra
         return [
             SuperbanServiceProvider::class,
         ];
-    }
-
-    public function getEnvironmentSetUp($app)
-    {
-        config()->set('database.default', 'testing');
-
-        /*
-        $migration = include __DIR__.'/../database/migrations/create_superban_table.php.stub';
-        $migration->up();
-        */
     }
 }

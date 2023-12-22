@@ -1,19 +1,11 @@
-# Add the ability to ban a client completely from accessing your app routes for a period of time.
+![superban](https://banners.beyondco.de/Superban.png?theme=light&packageManager=composer+require&packageName=zeevx%2Fsuperban&pattern=cage&style=style_1&description=Add+the+ability+to+ban+a+client+completely+from+accessing+your+app+routes+for+a+period+of+time.&md=1&showWatermark=1&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg&widths=100&heights=100)
+
+## Laravel Superban .
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/zeevx/superban.svg?style=flat-square)](https://packagist.org/packages/zeevx/superban)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/zeevx/superban/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/zeevx/superban/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/zeevx/superban/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/zeevx/superban/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/zeevx/superban.svg?style=flat-square)](https://packagist.org/packages/zeevx/superban)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
-
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/superban.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/superban)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+Add the ability to ban a client completely from accessing your app routes for a period of time.
 
 ## Installation
 
@@ -23,37 +15,76 @@ You can install the package via composer:
 composer require zeevx/superban
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="superban-migrations"
-php artisan migrate
-```
-
 You can publish the config file with:
 
 ```bash
 php artisan vendor:publish --tag="superban-config"
 ```
 
+To use middleware add them inside your app/Http/Kernel.php :
+
+```bash
+    protected $routeMiddleware = [
+        'superban' => \Zeevx\Superban\Middlewares\SuperbanMiddleware::class,
+    ];
+```
+
 This is the contents of the published config file:
 
 ```php
 return [
+/**
+     * Key used in cache
+     * The default is ip_address, you can use either: ip_address or email or user_id
+     *
+     */
+    'key' => 'ip_address',
+
+    /**
+     * The cache to be used,
+     * The default cache in config/cache.php is used if empty.
+     */
+    'cache' => 'file',
+
+    /**
+     * Specify guard to be used if you are using email or user_id
+     * The default guard in config/auth.php is used if empty
+     */
+    'user_guard' => '',
+
+    /**
+     * Enable email notification for when a user is banned
+     *
+     */
+    'enable_email_notification' => true,
+
+    /**
+     * Email address to be used for email notification
+     *
+     */
+    'email_address' => '',
 ];
 ```
 
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="superban-views"
-```
-
 ## Usage
+Apply the middleware to any route in this format:
+
+X - Number of request
+
+Y - Within what period (in minutes)
+
+Z- How long the user should be banned (in minutes).
 
 ```php
-$superban = new Zeevx\Superban();
-echo $superban->echoPhrase('Hello, Zeevx!');
+Route::middleware(['superban:X,Y,Z])->group(function () {
+   Route::post('/thisroute', function () {
+       // ...
+   });
+ 
+   Route::post('anotherroute', function () {
+       // ...
+   });
+});
 ```
 
 ## Testing
@@ -61,18 +92,6 @@ echo $superban->echoPhrase('Hello, Zeevx!');
 ```bash
 composer test
 ```
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
 
 ## Credits
 
