@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class SuperbanMiddleware
 {
-    public function handle(Request $request, Closure $next, $maxAttempt, $decaySeconds, $banSeconds)
+    public function handle(Request $request, Closure $next, $maxAttempt, $decayMinutes, $banMinutes)
     {
         $superban_key = config('superban.key');
         $superban_guard = config('superban.user_guard');
@@ -37,11 +37,10 @@ class SuperbanMiddleware
             throw new HttpException(403, 'Access forbidden.', null);
         }
         if (RateLimiter::remaining($key, $maxAttempt)) {
-            RateLimiter::hit($key, $decaySeconds);
-
+            RateLimiter::hit($key, $decayMinutes * 60);
             return $next($request);
         }
-        if (Cache::driver($superban_cache)->put("superban-{$key}", true, now()->addSeconds($banSeconds))) {
+        if(Cache::driver($superban_cache)->put("superban-{$key}", true, now()->addMinutes($banMinutes))){
             $date = now()->toDateTimeString();
             if ($enable_email_notification && ! is_null($email_address)) {
                 Mail::raw("
