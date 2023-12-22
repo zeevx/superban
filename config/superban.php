@@ -22,7 +22,7 @@ return [
     /**
      * Enable email notification for when a user is banned
      */
-    'enable_email_notification' => true,
+    'enable_email_notification' => false,
 
     /**
      * Email address to be used for email notification
