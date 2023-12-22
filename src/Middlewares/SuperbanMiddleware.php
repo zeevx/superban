@@ -20,29 +20,30 @@ class SuperbanMiddleware
         $email_address = config('superban.email_address');
         $enable_email_notification = config('superban.enable_email_notification');
 
-        if (!is_null($superban_cache)){
+        if (! is_null($superban_cache)) {
             config(['cache.limiter' => $superban_cache]);
         }
-        if (is_null($superban_guard)){
+        if (is_null($superban_guard)) {
             $superban_guard = null;
         }
         if ($superban_key === 'user_id') {
-            $key =  $request->user($superban_guard)->id ?? $request->ip();
+            $key = $request->user($superban_guard)->id ?? $request->ip();
         } elseif ($superban_key === 'email') {
-            $key =  $request->user($superban_guard)->email ?? $request->ip();
+            $key = $request->user($superban_guard)->email ?? $request->ip();
         } else {
             $key = $request->ip();
         }
-        if (Cache::driver($superban_cache)->get("superban-{$key}")){
-            throw new HttpException( 403, 'Access forbidden.',  null);
+        if (Cache::driver($superban_cache)->get("superban-{$key}")) {
+            throw new HttpException(403, 'Access forbidden.', null);
         }
         if (RateLimiter::remaining($key, $maxAttempt)) {
             RateLimiter::hit($key, $decaySeconds);
+
             return $next($request);
         }
-        if(Cache::driver($superban_cache)->put("superban-{$key}", true, now()->addSeconds($banSeconds))){
+        if (Cache::driver($superban_cache)->put("superban-{$key}", true, now()->addSeconds($banSeconds))) {
             $date = now()->toDateTimeString();
-            if($enable_email_notification && ! is_null($email_address)){
+            if ($enable_email_notification && ! is_null($email_address)) {
                 Mail::raw("
                 You are receiving this automated email because a user got banned. \n
                 User key > {$key} \n
@@ -54,6 +55,6 @@ class SuperbanMiddleware
                 });
             }
         }
-        throw new HttpException( 429, 'Too Many Attempts.',  null);
+        throw new HttpException(429, 'Too Many Attempts.', null);
     }
 }

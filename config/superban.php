@@ -4,7 +4,6 @@ return [
     /**
      * Key used in cache
      * The default is ip_address, you can use either: ip_address or email or user_id
-     *
      */
     'key' => 'ip_address',
 
@@ -22,13 +21,11 @@ return [
 
     /**
      * Enable email notification for when a user is banned
-     *
      */
     'enable_email_notification' => true,
 
     /**
      * Email address to be used for email notification
-     *
      */
     'email_address' => '',
 ];
